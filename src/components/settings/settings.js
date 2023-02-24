@@ -21,6 +21,8 @@ export const messages = {
   isRequired: 'This field is required!',
   isEmptyBook: 'The phonebook is empty...',
   noMatches: 'No matches found!',
+  userIsExist:
+    'Contact with this name is already exist. Please change another name.',
 };
 
 export const BASE_URL = 'https://connections-api.herokuapp.com';

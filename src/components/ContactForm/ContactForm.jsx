@@ -1,5 +1,6 @@
 import * as React from 'react';
 import PropTypes from 'prop-types';
+
 import Box from '@mui/material/Box';
 import Table from '@mui/material/Table';
 import TableBody from '@mui/material/TableBody';
@@ -15,15 +16,17 @@ import Paper from '@mui/material/Paper';
 import IconButton from '@mui/material/IconButton';
 import DeleteIcon from '@mui/icons-material/Delete';
 import { visuallyHidden } from '@mui/utils';
+
+import { messages } from 'components/settings';
 import Modal from 'components/Modal/Modal';
 import ControlPointIcon from '@mui/icons-material/ControlPoint';
 import Filter from 'components/Filter';
+import { useFilteredContacts } from 'components/hooks/useFilteredContacts';
 
 import {
   useAddContactMutation,
   useDeleteContactMutation,
 } from 'redux/contacts/contacts';
-import { useFilteredContacts } from 'components/hooks/useFilteredContacts';
 
 function descendingComparator(a, b, orderBy) {
   if (b[orderBy] < a[orderBy]) {
@@ -58,13 +61,13 @@ const headCells = [
     id: 'id',
     numeric: true,
     disablePadding: false,
-    label: 'N',
+    label: '№',
   },
   {
     id: 'name',
     numeric: false,
     disablePadding: false,
-    label: 'User name',
+    label: 'Contact name',
   },
   {
     id: 'number',
@@ -72,12 +75,11 @@ const headCells = [
     disablePadding: false,
     label: 'Phone number',
   },
-
   {
     id: 'deleteContact',
     numeric: true,
     disablePadding: false,
-    label: 'Delete contact',
+    label: 'Delete',
   },
 ];
 
@@ -117,12 +119,6 @@ function EnhancedTableHead(props) {
   );
 }
 
-EnhancedTableHead.propTypes = {
-  onRequestSort: PropTypes.func.isRequired,
-  order: PropTypes.oneOf(['asc', 'desc']).isRequired,
-  orderBy: PropTypes.string.isRequired,
-};
-
 function EnhancedTableToolbar(props) {
   const { contactsCount, allUsersArray } = props;
   const [addContact, { isLoading: addContactIsLoading }] =
@@ -152,17 +148,6 @@ function EnhancedTableToolbar(props) {
   );
 }
 
-EnhancedTableToolbar.propTypes = {
-  contactsCount: PropTypes.number.isRequired,
-  allUsersArray: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      name: PropTypes.string.isRequired,
-      number: PropTypes.string.isRequired,
-    })
-  ),
-};
-
 export default function ContactsTable() {
   const [order, setOrder] = React.useState('asc');
   const [orderBy, setOrderBy] = React.useState('name');
@@ -171,13 +156,13 @@ export default function ContactsTable() {
   const [deleteById, { isLoading }] = useDeleteContactMutation();
   const { filteredContacts, contacts } = useFilteredContacts();
 
-  const handleRequestSort = (event, property) => {
+  const handleRequestSort = (_, property) => {
     const isAsc = orderBy === property && order === 'asc';
     setOrder(isAsc ? 'desc' : 'asc');
     setOrderBy(property);
   };
 
-  const handleChangePage = (event, newPage) => {
+  const handleChangePage = (_, newPage) => {
     setPage(newPage);
   };
 
@@ -193,7 +178,6 @@ export default function ContactsTable() {
     deleteById(id);
   };
 
-  // Avoid a layout jump when reaching the last page with empty rows.
   const emptyRows =
     page > 0
       ? Math.max(0, (1 + page) * rowsPerPage - filteredContacts.length)
@@ -222,7 +206,7 @@ export default function ContactsTable() {
               <TableBody>
                 {stableSort(filteredContacts, getComparator(order, orderBy))
                   .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                  .map((row, index, array) => {
+                  .map((row, index, _) => {
                     const labelId = `enhanced-table-checkbox-${index}`;
                     const numberByOrder = index + 1;
 
@@ -276,7 +260,7 @@ export default function ContactsTable() {
               justifyContent: 'center',
             }}
           >
-            The phonebook is empty
+            {messages.isEmptyBook}
           </Box>
         ) : (
           <TablePagination
@@ -293,3 +277,20 @@ export default function ContactsTable() {
     </Box>
   );
 }
+
+EnhancedTableHead.propTypes = {
+  onRequestSort: PropTypes.func.isRequired,
+  order: PropTypes.oneOf(['asc', 'desc']).isRequired,
+  orderBy: PropTypes.string.isRequired,
+};
+
+EnhancedTableToolbar.propTypes = {
+  contactsCount: PropTypes.number.isRequired,
+  allUsersArray: PropTypes.arrayOf(
+    PropTypes.shape({
+      id: PropTypes.string.isRequired,
+      name: PropTypes.string.isRequired,
+      number: PropTypes.string.isRequired,
+    })
+  ),
+};
