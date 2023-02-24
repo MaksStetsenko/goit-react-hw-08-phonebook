@@ -16,9 +16,22 @@ export const validationString = {
     /\+?\d{1,4}?[-.\s]?\(?\d{1,3}?\)?[-.\s]?\d{1,4}[-.\s]?\d{1,4}[-.\s]?\d{1,9}/,
 };
 
-export const message = {
+export const messages = {
   wrongInput: 'Input is not valid!',
   isRequired: 'This field is required!',
   isEmptyBook: 'The phonebook is empty...',
   noMatches: 'No matches found!',
+};
+
+export const BASE_URL = 'https://connections-api.herokuapp.com';
+
+export const USER_ENDPOINT = {
+  signup: '/users/signup',
+  login: '/users/login',
+  logout: '/users/logout',
+  current: '/users/current',
+};
+
+export const CONTACTS_ENDPOINT = {
+  contacts: '/contacts',
 };

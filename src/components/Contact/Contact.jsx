@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { sellectContacts } from 'redux/selectors';
-import { clearFilterReducer } from 'redux/filterSlice';
+import { clearFilterReducer } from 'redux/filter/filterSlice';
 import { deleteContact } from 'redux/contacts/contactsOperations';
 
 import { MdDelete } from 'react-icons/md';

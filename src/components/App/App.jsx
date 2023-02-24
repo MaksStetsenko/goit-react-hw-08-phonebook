@@ -1,78 +1,62 @@
-import React, { useEffect } from 'react';
+import { PrivateRoute } from 'components/AuthRoutes/PrivateRoute';
+import { PublicRoute } from 'components/AuthRoutes/PublicRoute';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import { Home } from 'Pages/Home';
+import { lazy, Suspense, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Route, Routes } from 'react-router-dom';
+import { refresh, selectIsRefreshing } from 'redux/auth';
+import { FullscreenSpiner } from 'components/Spiner/Spiner';
 
-import {
-  sellectError,
-  sellectFilteredContacts,
-  sellectIsLoading,
-  sellectIsPhonebookEmpty,
-} from 'redux/selectors';
-
-import { message } from 'components/settings';
-import { Box } from 'components/Box';
-import Section from 'components/Section';
-import ContactForm from 'components/ContactForm';
-import Filter from 'components/Filter';
-import ContactList from 'components/ContactList';
-import Notification from 'components/Notification';
-
-import { AppStyled, AppTitleStyled } from './App.styled';
-import { fetchContacts } from 'redux/contacts/contactsOperations';
+const Layout = lazy(() => import('components/Layout'));
+const LoginPage = lazy(() => import('Pages/LoginPage'));
+const RegisterPage = lazy(() => import('Pages/RegisterPage'));
+const Contacts = lazy(() => import('Pages/Contacts'));
 
 export const App = () => {
   const dispatch = useDispatch();
-  const isLoading = useSelector(sellectIsLoading);
-  const error = useSelector(sellectError);
-  const filteredContacts = useSelector(sellectFilteredContacts);
-  const isPhonebookEmpty = useSelector(sellectIsPhonebookEmpty);
-  const isFilteredContactsEmpty = filteredContacts.length === 0;
-  const { isEmptyBook, noMatches } = message;
+  const isRefreshing = useSelector(selectIsRefreshing);
 
   useEffect(() => {
-    dispatch(fetchContacts());
+    dispatch(refresh());
   }, [dispatch]);
 
-  //=========== render ==============================================
-
   return (
-    <Box
-      height="100vh"
-      display="flex"
-      flexDirection="column"
-      alignItems="center"
-      justifyContent="center"
-      fontSize="l"
-      color="primary"
-    >
-      <AppTitleStyled>My phonebook</AppTitleStyled>
+    <>
+      <Suspense fallback={<FullscreenSpiner />}>
+        {!isRefreshing && (
+          <Routes>
+            <Route path="/" element={<Layout />}>
+              <Route index element={<Home />} />
 
-      <AppStyled>
-        <Section title="Contacts editor">
-          <ContactForm />
-        </Section>
+              {/* Public */}
+              <Route path="/" element={<PublicRoute />}>
+                <Route path="register" element={<RegisterPage />} />
+                <Route path="login" element={<LoginPage />} />
+              </Route>
 
-        <Box display="block" height="20px" textAlign="center" color="red">
-          {isLoading && <div>Loading</div>}
-        </Box>
-
-        {!error && (
-          <Section title="Contacts">
-            {isPhonebookEmpty ? (
-              <Notification message={isEmptyBook} />
-            ) : (
-              <>
-                <Filter />
-
-                {isFilteredContactsEmpty ? (
-                  <Notification message={noMatches} />
-                ) : (
-                  <ContactList />
-                )}
-              </>
-            )}
-          </Section>
+              {/* private */}
+              <Route path="/" element={<PrivateRoute />}>
+                <Route path="contacts" element={<Contacts />} />
+              </Route>
+              <Route path="*" element={<div>Type loading ERROR!</div>} />
+            </Route>
+          </Routes>
         )}
-      </AppStyled>
-    </Box>
+        <ToastContainer
+          position="top-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
+      </Suspense>
+    </>
   );
 };
